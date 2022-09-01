@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from keras.models import load_model
-from keras.preprocessing import sequence
+from keras_preprocessing import sequence
 
 from .utils import (url2domain, get_app_file_path, download_file, find_ngrams,
                     MODELS_BASE_URL)
@@ -102,12 +102,12 @@ def pred_shalla(df, domain_names="domain_names", year=2017, latest=False):
     X = np.array(df[col_domain].apply(lambda c: find_ngrams(vocab, c, NGRAMS)))
     X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
 
-    df['shalla_cat'] = model.predict_classes(X, verbose=2)
+    df['shalla_cat'] = np.argmax(model.predict(X), axis=-1)
 
     df[col_lab] = df.shalla_cat.apply(lambda c: cats[c])
     del df['shalla_cat']
 
-    proba = model.predict_proba(X, verbose=2)
+    proba = model.predict(X, verbose=2)
 
     pdf = pd.DataFrame(proba, columns=col_probs)
     pdf.set_index(df.index, inplace=True)
